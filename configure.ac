@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.61)
-AC_INIT([sparometer], [0.0.6], [chlor@schou.dk])
+AC_INIT([sparometer], [0.0.7], [chlor@schou.dk])
 AC_CONFIG_SRCDIR([sparometer.c])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)

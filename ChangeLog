@@ -1,3 +1,8 @@
+0.0.7	* msparometer script added for better user interface
+	* Removed added space ' ' from '--get-text' output
+	* Introduced delimiter, default is tabulator
+	* '*' was previously removed from result text, now kept
+
 0.0.6	* Segmentation fault
 	* --help --verbose gave a segmentation fault
 

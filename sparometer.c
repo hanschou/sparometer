@@ -52,11 +52,12 @@ sparometer --get-sample-effect --get-sample-current --get-sample-voltage --loop=
 
 static char *o_date = "991231";
 static char *o_time = "235959";
-static char *o_interval = "01*min";
+static char *o_interval = "15*min";
 static char *o_owner_nr = "99";
 static char *o_periode_effect = "1";
 static char *o_tarif = "1.550";
 static char *o_text = "SPAROMETER";
+static char *o_delimiter = "\t";
 
 static char *o_help = "0";
 static char *o_debug = "0";
@@ -143,11 +144,11 @@ struct command_serial_t {
 
 static struct command_serial_t command_serial[] = {
 	{ "data-readout",         non, 0,   0, NULL,              d300,  '\x03', &cs_data_readout,         "data_readout" },
-	{ "get-date",             non, 0, 'd', NULL,              p300,  '\x03', &cs_get_date,             "get_date" },
-	{ "get-interval",         non, 0, 'I', NULL,              p300,  '\x03', &cs_get_interval,         "get_interval" },
-	{ "get-kwh",              non, 0, 'H', NULL,              p300,  '\x03', &cs_get_kwh,              "get_kwh" },
+	{ "get-date",             non, 0, 'd', NULL,              p300,  '\x03', &cs_get_date,             "Get current date in the format YYMMDD." },
+	{ "get-interval",         non, 0, 'I', NULL,              p300,  '\x03', &cs_get_interval,         "Get log interval. Minimum 1 minute." },
+	{ "get-kwh",              non, 0, 'H', NULL,              p300,  '\x03', &cs_get_kwh,              "Get kWh consumed since --reset-log." },
 	{ "get-log-time",         non, 0,   0, NULL,              p300,  '\x03', &cs_get_log_time,         "get_log_time" },
-	{ "get-logdata",          non, 0, 'l', NULL,             p9600,  '\x03', &cs_get_logdata,          "get_logdata" },
+	{ "get-logdata",          non, 0, 'l', NULL,             p9600,  '\x03', &cs_get_logdata,          "Get logdata sampled in the device. Call --get-log-time to see if any data has been logged." },
 	{ "get-max-effect",       non, 0, 'X', NULL,              p300,  '\x03', &cs_get_max_effect,       "get_max_effect" },
 	{ "get-min-effect",       non, 0, 'N', NULL,              p300,  '\x03', &cs_get_min_effect,       "get_min_effect" },
 	{ "get-owner-nr",         non, 0, 'O', NULL,              p300,  '\x03', &cs_get_owner_nr,         "get_owner_nr" },
@@ -173,7 +174,7 @@ static struct command_serial_t command_serial[] = {
 	{ "programming-mode300",  non, 0, '3', NULL,              p300,  '\x00', &cs_programming_mode300,  "programming_mode300" },
 	{ "programming-mode4800", non, 0, '4', NULL,              p300,  '\x03', &cs_programming_mode4800, "programming_mode4800" },
 	{ "programming-mode9600", non, 0, '9', NULL,              p300,  '\x03', &cs_programming_mode9600, "programming_mode9600" },
-	{ "reset-log",            non, 0, 'r', NULL,             m9600,  '\x06', &cs_reset_log,            "Clear all logging data stored internal." },
+	{ "reset-log",            non, 0, 'r', NULL,             m9600,  '\x06', &cs_reset_log,            "Clear all logging data stored internal. Call --start-log to start logging again." },
 	{ "set-date",             opt, 0, 'D', &o_date,           p300,  '\x03', &cs_set_date,             "Set date in YYMMDD format. If no date given current system day will be used. Syntax: --set-date[=<YYMMDD>]. --set-date=$(date +%y%m%d)" },
 	{ "set-interval",         req, 0,   0, &o_interval,       p300,  '\x03', &cs_set_interval,         "set_interval" },
 	{ "set-owner-nr",         req, 0,   0, &o_owner_nr,       p300,  '\x03', &cs_set_owner_nr,         "set_owner_nr" },
@@ -181,10 +182,11 @@ static struct command_serial_t command_serial[] = {
 	{ "set-tarif",            req, 0, 'R', &o_tarif,          p300,  '\x03', &cs_set_tarif,            "set_tarif" },
 	{ "set-text",             req, 0, 'T', &o_text,           p300,  '\x03', &cs_set_text,             "set_text max 30 ASCII characters except '()'. --set-text=$(hostname -f)" },
 	{ "set-time",             opt, 0, '1', &o_time,           p300,  '\x03', &cs_set_time,             "Set time in HHMMSS format. If no time given current system time will be used. Syntax: --set-time[=<HHMMSS>]. Example: --set-time=$(date +%H%M%S)" },
-	{ "start-log",            non, 0, 'a', NULL,             m9600,  '\x03', &cs_start_log,            "start_log" },
+	{ "start-log",            non, 0, 'a', NULL,             m9600,  '\x03', &cs_start_log,            "Start logging. Data kan be read out with --get-logdata after 'interval' time has past. Call --get-log-time to see how many seconds the logging has been active, which is suitable call before --get-logdata is called." },
 	{ "stop-log",             non, 0, 'o', NULL,             m9600,  '\x03', &cs_stop_log,             "stop_log" },
 	{ "delay",                req, 0,   0, &o_delay,          none,       0, NULL,                     "Delay in seconds between executing commands. Example: --delay=1.234567. If no delay is given together with the 'loop' command, there will be no delay. Due to slow communication and A/D conversion the minimum delay is about 0.125 seconds at 9600 baud." },
 	{ "device",               req, 0,   0, &o_device,         none,       0, NULL,                     "List of serial port devices to try to open. --device=<serial>[:<serial>]. Example: --device=/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0" },
+	{ "delimiter",            opt, 0,   0, &o_delimiter,      none,       0, NULL,                     "Delimiter for logdata. Default is tabulator." },
 	{ "debug",                opt, 0,   0, &o_debug,          none,       0, NULL,                     "Turn on debug." },
 	{ "help",                 non, 0, 'h', &o_help,           none,       0, NULL,                     "This help. Use '--verbose' for more details." },
 	{ "loop",                 opt, 0,   0, &o_loop,           none,       0, NULL,                     "Loop commands given. 'loop=0' equals loop for ever." },
@@ -446,15 +448,14 @@ void formatnice(void *buf2, int count, char *b) {
 		switch (buf[i]) {
 			case ')':
 				wrout = 0;
-				if (chrwritten) {
-					sprintf(b, " ");
-					++b;
-				}
 				break;
 			case '(':
 				wrout = 1;
-				break;
-			case '*':
+				/* If out buffer dirty, add a delimiter */
+				if (chrwritten) {
+					sprintf(b, o_delimiter);
+					b += strlen(o_delimiter);
+				}
 				break;
 			default:
 				if (wrout && isprint(buf[i])) {
@@ -804,7 +805,7 @@ int wp(int fd, const void *buf) {
 				resp = get_error_response((char *)&buffer);
 				if (resp == no_error || verbose) {
 					if (verbose) {
-						printf("Read : ");
+						printf("Read: ");
 					}
 					printbuf(&buffer, num, NULL, verbose);
 				}
@@ -855,7 +856,7 @@ int sendreceive(int fd, struct command_serial_t *cmd ) {
 				resp = get_error_response((char *)&rbuffer);
 				if (resp == no_error || verbose) {
 					if (verbose) {
-						printf("Read : ");
+						printf("Read: ");
 					}
 					printbuf(&rbuffer, num, NULL, verbose);
 				}
