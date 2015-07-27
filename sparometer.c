@@ -550,9 +550,9 @@ void show_help(void) {
 	int i = 0;
 	struct command_serial_t *c;
 
-	printf("%s version %s.\n", PACKAGE, VERSION);
+	printf("%s version %s for %s %s.\n", PACKAGE, VERSION, KERNEL_NAME, MACHINE);
 	printf("Copyright © %s by Hans Schou <%s>\n", YEAR, PACKAGE_BUGREPORT);
-	printf("Homepage: http://schou.dk/linux/sparometer/\n");
+	printf("Homepage: %s\n", PACKAGE_URL);
 	printf("Build date: %s\n", ISODATE);
 	printf("\n");
 	while (command_serial[i].name) {

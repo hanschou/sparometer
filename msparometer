@@ -13,10 +13,10 @@ declare -a DATAFILES=()
 TMPDIR=${TMPDIR:-$HOME/tmp}
 [ ! -d $TMPDIR ] && mkdir -p $TMPDIR
 
-RAW_DIR=${RAW_DIR:-$HOME/sparometer}
+RAW_DIR=${RAW_DIR:-$PWD}
 [ ! -d $RAW_DIR ] && mkdir -p $RAW_DIR
 
-TSV_DIR=${TSV_DIR:-$HOME/sparometer}
+TSV_DIR=${TSV_DIR:-$PWD}
 [ ! -d $TSV_DIR ] && mkdir -p $TSV_DIR
 
 TEXT=${DEFAULT_TEXT:-sparometer}
@@ -49,6 +49,8 @@ done
 echo
 }
 
+# Remove '.' dot from number
+# Arg1: Floating point number
 function float100() {
 echo ${1/./}00
 }
@@ -145,6 +147,7 @@ echo display $PNG
 }
 
 # Split logfile into several based on start time.
+# Arg1: Filename to split
 function splitlogfile() {
 RAWFILE=$1
 # If RAWFILE has TEXT in the name, grab it.

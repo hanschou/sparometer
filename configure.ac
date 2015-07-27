@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.61)
-AC_INIT([sparometer], [0.0.7], [chlor@schou.dk])
+AC_PREREQ(2.69)
+AC_INIT([sparometer], [0.0.8], [chlor@schou.dk], [sparometer], [http://schou.dk/linux/sparometer/])
 AC_CONFIG_SRCDIR([sparometer.c])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
@@ -39,12 +39,12 @@ AC_CHECK_FUNCS([select])
 AC_CHECK_FUNCS([gettimeofday])
 AC_CHECK_FUNCS([strerror])
 
+AC_DEFINE_UNQUOTED([ISODATE], "$(date +%F)", [Date when configure was done])
 
-ISODATE=`date -I`
-AC_DEFINE_UNQUOTED([ISODATE], "$ISODATE", [Date when configure was done])
+AC_DEFINE_UNQUOTED([YEAR], "$(date +%Y)", [Year when configure was done])
 
-YEAR=`date +%Y`
-AC_DEFINE_UNQUOTED([YEAR], "$YEAR", [Year when configure was done])
+AC_DEFINE_UNQUOTED([KERNEL_NAME], "$(uname)", [Compiled for operating system])
+AC_DEFINE_UNQUOTED([MACHINE], "$(uname -m)", [Machine architecture])
 
 AC_ARG_ENABLE(
 	[debug],
@@ -69,7 +69,7 @@ AC_ARG_ENABLE(
 	[serial_device],
 	AS_HELP_STRING(
 		[--enable-serial-device=/dev/ttyUSB0],
-		[Default serial device when none specified on command line]
+		[Default serial device when none specified on command line. For FreeBSD use /dev/cuaU0. For Solaris use /dev/cua/0]
 		),
 	AC_DEFINE_UNQUOTED(
 		[SDEVICE], 

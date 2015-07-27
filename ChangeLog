@@ -1,3 +1,5 @@
+0.0.8	* Tested OK on 64 bit Linux
+
 0.0.7	* msparometer script added for better user interface
 	* Removed added space ' ' from '--get-text' output
 	* Introduced delimiter, default is tabulator

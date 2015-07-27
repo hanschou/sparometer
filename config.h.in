@@ -85,6 +85,12 @@
 /* Date when configure was done */
 #undef ISODATE
 
+/* Compiled for operating system */
+#undef KERNEL_NAME
+
+/* Machine architecture */
+#undef MACHINE
+
 /* Name of package */
 #undef PACKAGE
 
