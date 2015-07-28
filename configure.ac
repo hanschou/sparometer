@@ -62,12 +62,35 @@ AC_ARG_ENABLE(
 		)
 )
 
-SERIAL_DEFAULT=/dev/ttyUSB0
+#
+# Platform specific setup
+#
+#############################
+AC_CANONICAL_HOST
+# Check for which host we are on and setup a few things
+# specifically based on the host
+#AC_MSG_ERROR([Your platform $host_os])
+case $host_os in
+	linux*)
+		SERIAL_DEFAULT=/dev/ttyUSB0
+		;;
+	freebsd*|darwin*)
+		SERIAL_DEFAULT=/dev/cuaU0
+		;;
+	sun*)
+		SERIAL_DEFAULT=/dev/cua/0
+		;;
+	*)
+		#Default Case
+		AC_MSG_ERROR([Your platform is not currently supported])
+		;;
+esac
+
 AC_ARG_ENABLE(
 	[serial_device],
 	AS_HELP_STRING(
-		[--enable-serial-device=/dev/ttyUSB0],
-		[Default serial device when none specified on command line. For FreeBSD use /dev/cuaU0. For Solaris use /dev/cua/0]
+		[--enable-serial-device=/dev/xxx],
+		[Default serial device when none specified on command line. For FreeBSD use /dev/cuaU0. For Sun Solaris use /dev/cua/0]
 		),
 	AC_DEFINE_UNQUOTED(
 		[SDEVICE], 
