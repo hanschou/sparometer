@@ -40,10 +40,8 @@ AC_CHECK_FUNCS([gettimeofday])
 AC_CHECK_FUNCS([strerror])
 
 AC_DEFINE_UNQUOTED([ISODATE], "$(date +%F)", [Date when configure was done])
-
 AC_DEFINE_UNQUOTED([YEAR], "$(date +%Y)", [Year when configure was done])
-
-AC_DEFINE_UNQUOTED([KERNEL_NAME], "$(uname)", [Compiled for operating system])
+AC_DEFINE_UNQUOTED([KERNEL_NAME], "$(uname -s)", [Compiled for operating system])
 AC_DEFINE_UNQUOTED([MACHINE], "$(uname -m)", [Machine architecture])
 
 AC_ARG_ENABLE(

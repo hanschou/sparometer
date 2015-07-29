@@ -196,7 +196,6 @@ static struct command_serial_t command_serial[] = {
 };
 
 static const struct timeval timeval_1_0 = {1,0};
-static const struct timeval timeval_2_0 = {2,0};
 
 struct timeval atotimeval(char *argv) {
 	struct timeval temp = {0, 0};
@@ -453,7 +452,7 @@ void formatnice(void *buf2, int count, char *b) {
 				wrout = 1;
 				/* If out buffer dirty, add a delimiter */
 				if (chrwritten) {
-					sprintf(b, o_delimiter);
+					sprintf(b, "%s", o_delimiter);
 					b += strlen(o_delimiter);
 				}
 				break;
@@ -551,7 +550,7 @@ void show_help(void) {
 	struct command_serial_t *c;
 
 	printf("%s version %s for %s %s.\n", PACKAGE, VERSION, KERNEL_NAME, MACHINE);
-	printf("Copyright © %s by Hans Schou <%s>\n", YEAR, PACKAGE_BUGREPORT);
+	printf("Copyright (C) %s by Hans Schou <%s>\n", YEAR, PACKAGE_BUGREPORT);
 	printf("Homepage: %s\n", PACKAGE_URL);
 	printf("Build date: %s\n", ISODATE);
 	printf("\n");
@@ -734,9 +733,7 @@ ssize_t readwait(int fd, void *buf, size_t count) {
 
 	return retval < 0
 		? retval
-		: ( num  < 0 
-			? num 
-			: idx);
+		: idx;
 }
 
 enum error_response_t {
@@ -842,7 +839,7 @@ int sendreceive(int fd, struct command_serial_t *cmd ) {
 		snprintf((char *)&wbuffer, sizeof(wbuffer), *cmd->command_data, *(char **)cmd->command_arg);
 	} else {
 		if (verbose) printf("':");
-		snprintf((char *)&wbuffer, sizeof(wbuffer), *cmd->command_data);
+		snprintf((char *)&wbuffer, sizeof(wbuffer), "%s", *cmd->command_data);
 	}
 
 	while (try--) {
@@ -870,6 +867,26 @@ int sendreceive(int fd, struct command_serial_t *cmd ) {
 	return 0;
 }
 
+#if defined (__linux__)
+#	define LFLAG_0 ISIG | ICANON | ECHO | ECHONL | NOFLSH | XCASE | TOSTOP | ECHOPRT
+#	define LFLAG_1 IEXTEN | ECHOE | ECHOK | ECHOCTL | ECHOKE
+#	define IFLAG_0 IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | ISTRIP | IGNCR | ICRNL | IXOFF | IUCLC | IXANY | IMAXBEL | IUTF8
+#	define IFLAG_1 IXON
+#	define OFLAG_0 OPOST | OLCUC | ONLCR | ONOCR | ONLRET | OFILL | OFDEL
+#	define OFLAG_1 NL0 | CR0 | TAB0 | BS0 | VT0 | FF0
+#endif
+#if defined (__FreeBSD__) || defined (__sun__)
+#	define LFLAG_0 ISIG | ICANON | ECHO | ECHONL | NOFLSH | TOSTOP | ECHOPRT
+#	define LFLAG_1 IEXTEN | ECHOE | ECHOK | ECHOCTL | ECHOKE
+#	define IFLAG_0 IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | ISTRIP | IGNCR | ICRNL | IXOFF | IXANY | IMAXBEL
+#	define IFLAG_1 IXON
+#	define OFLAG_0 OPOST | ONLCR | ONOCR | ONLRET
+#	define OFLAG_1 TAB0
+#endif
+#ifndef OFLAG_0
+#	error "Undefined OS - termios OFLAG_0 not set, fix above this line."
+#endif
+
 /*
  * Set baud rate
  *   setbaud(B300);
@@ -882,12 +899,12 @@ void setbaud(int fd, tcflag_t baud) {
 	/* 300 baud, 7 data bits, 1 stop bit, even parity */
 	term.c_cflag = baud | CS7 | CSTOPB | PARENB | CLOCAL | CREAD;
 	term.c_cflag &= ~( PARODD | HUPCL | CRTSCTS );
-	term.c_lflag &= ~( ISIG | ICANON | ECHO | ECHONL | NOFLSH | XCASE | TOSTOP | ECHOPRT );
-	term.c_lflag |= ( IEXTEN | ECHOE | ECHOK | ECHOCTL | ECHOKE );
-	term.c_iflag &= ~( IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | ISTRIP | IGNCR | ICRNL | IXOFF | IUCLC | IXANY | IMAXBEL | IUTF8 );
-	term.c_iflag |= ( IXON );
-	term.c_oflag &= ~( OPOST | OLCUC | ONLCR | ONOCR | ONLRET | OFILL | OFDEL );
-	term.c_oflag |= ( NL0 | CR0 | TAB0 | BS0 | VT0 | FF0 );
+	term.c_lflag &= ~( LFLAG_0 );
+	term.c_lflag |= ( LFLAG_1 );
+	term.c_iflag &= ~( IFLAG_0 );
+	term.c_iflag |= ( IFLAG_1 );
+	term.c_oflag &= ~( OFLAG_0 );
+	term.c_oflag |= ( OFLAG_1 );
 	e(tcsetattr(fd, TCSANOW, &term), "TCSETS");
 	/* TODO: /dev/ttyUSB0 need a flush buffer after tcsetattr() */ 
 	readwait(fd, &term, sizeof(term));
@@ -1038,8 +1055,7 @@ int processdevice(char *device) {
 			setmodebaud(fd, p300);
 			usleep(100000); /* wait for data written */
 		}
-
-		ioctl(fd, TCSETS, &term_orig);
+		tcsetattr(fd, TCSANOW, &term_orig);
 		close(fd);
 	}
 
