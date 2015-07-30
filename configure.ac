@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.69)
+AC_PREREQ(2.68)
 AC_INIT([sparometer], [0.0.8], [chlor@schou.dk], [sparometer], [http://schou.dk/linux/sparometer/])
 AC_CONFIG_SRCDIR([sparometer.c])
 AM_INIT_AUTOMAKE
