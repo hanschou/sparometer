@@ -69,7 +69,6 @@ AC_ARG_ENABLE(
 AC_CANONICAL_HOST
 # Check for which host we are on and setup a few things
 # specifically based on the host
-#AC_MSG_ERROR([Your platform $host_os])
 case $host_os in
 	linux*)
 		SERIAL_DEFAULT=/dev/ttyUSB0
@@ -77,12 +76,12 @@ case $host_os in
 	freebsd*|darwin*)
 		SERIAL_DEFAULT=/dev/cuaU0
 		;;
-	sun*)
+	solaris*)
 		SERIAL_DEFAULT=/dev/cua/0
 		;;
 	*)
 		#Default Case
-		AC_MSG_ERROR([Your platform is not currently supported])
+		AC_MSG_ERROR([Your platform is not currently supported: $host_os])
 		;;
 esac
 
