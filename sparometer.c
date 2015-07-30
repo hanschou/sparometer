@@ -618,7 +618,7 @@ void show_help(void) {
 		printf("\n");
 		i++;
 	}
-	printf("ENVIRONMENT\nSet environment variable by 'export " PACKAGE_NAME "=%s' for default serial port instead of the one specified during './configure --enable-serial-device=/dev/ttyUSB0'.\n\n", o_device);
+	printf("ENVIRONMENT\nSet environment variable by 'export " PACKAGE_NAME "=%s' for default serial port instead of the one specified during './configure --enable-serial-device=%s'.\n\n", o_device, o_device);
 	printf("Send bug reports to: <" PACKAGE_BUGREPORT ">\n");
 }
 
