@@ -25,11 +25,14 @@ Example of use:
 ===============
 
 Start logging data:
+
  sparometer --reset-log ; sparometer --set-{time,date,interval=01*min,text=mydevice} ; sparometer --start-log
 
 After 70 seconds (one sample) check it is running:
+
  sparometer --get-{log-time,sample-effect,kwh}
 
 When logging is done, read all data:
+
  msparometer
 
