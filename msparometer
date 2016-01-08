@@ -150,6 +150,10 @@ echo display $PNG
 # Arg1: Filename to split
 function splitlogfile() {
 RAWFILE=$1
+# if offline conversion and $WH is NULL, then take WH from filename.
+if [ -z "$WH" ]; then
+	[[ $RAWFILE =~ \.([0-9]+)wh\.raw ]] && WH=${BASH_REMATCH[1]}
+fi
 # If RAWFILE has TEXT in the name, grab it.
 [[ $RAWFILE =~ (^|/)([^/]+)\.20[0-9]{2}-[0-9]{2} ]] && TEXT=${BASH_REMATCH[2]}
 echo "Reading file: '$RAWFILE'"
