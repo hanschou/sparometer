@@ -21,7 +21,7 @@ TSV_DIR=${TSV_DIR:-$PWD}
 
 TEXT=${DEFAULT_TEXT:-sparometer}
 
-TEMPFILE=$(tempfile --directory=$TMPDIR )
+TEMPFILE=$(tempfile --directory=$TMPDIR)
 trap "rm -f -- '$TEMPFILE'" EXIT
 
 # Wait for process end and show seconds count down
@@ -263,6 +263,22 @@ if [ $LINES_EXP -gt 1 ]; then
 fi
 }
 
+function do_reset()
+{
+	interval="01*min"
+	textcmd=""
+	[ -n "$1" ] && textcmd=",text=$1"
+	echo Reset
+	sparometer --reset-log &
+	waitpid $! 9
+	echo Set: date time interval=${interval} ${textcmd/,/}
+	sparometer --set-{time,date,interval=${interval}${textcmd}} &
+	waitpid $! 7
+	echo Start log
+	sparometer --start-log &
+	waitpid $! 10
+}
+
 function show_help()
 {
 cat << EOF
@@ -271,6 +287,8 @@ Help for msparometer.
 Options:
 	--help
 		Show this help
+	--reset[=<text>]
+		Reset log and start. Set date and time, and optional af text.
 
 Syntax:
 	msparometer [input file]
@@ -294,7 +312,15 @@ else
 			if [ ${1%.tsv} != ${1} ]; then
 				plot $1
 			else
-				echo "Error, unknown file: '$1'"
+				if [ "${1/--reset/}" != "${1}" ]; then
+					text=""
+					if [ ${1/=/} != "${1}" ]; then
+						text="${1#*=}"
+					fi
+					do_reset ${text}
+				else
+					echo "Error, unknown file: '$1'"
+				fi
 			fi
 		fi
 		if [ "--help" = ${1} ]; then
