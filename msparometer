@@ -311,10 +311,17 @@ Help for msparometer.
 Options:
 	--help
 		Show this help
+
+	--read
+		Read data from sparometer and store in file.
+
 	--reset[=<text>]
 		Reset log and start. Set date and time, and optional af text.
+
 	--status
 		Get status of sparometer.
+	
+	If no option is given a --read command will be issued.
 
 Syntax:
 	msparometer [input file]
@@ -336,6 +343,9 @@ else
 			case ${1:2} in
 				help)
 					show_help
+					;;
+				read)
+					get_logdata
 					;;
 				status)
 					get_status
